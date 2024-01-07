@@ -4,22 +4,29 @@
 #nullable disable
 
 using System.Collections.Generic;
+using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
+using osu.Framework.Input.Events;
+using osu.Framework.Testing;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
+using osu.Game.Screens;
+using osu.Game.Screens.GameBox;
+using osu.Game.Screens.Menu;
 using osuTK;
-using osuTK.Graphics;
 
 namespace osu.Game.Overlays.Toolbar
 {
     public partial class ToolbarDateButton : OsuClickableContainer
     {
+        private Box hoverBackground;
         private OsuSpriteText text;
+        private OsuGame game;
 
         public ToolbarDateButton()
         {
@@ -28,8 +35,9 @@ namespace osu.Game.Overlays.Toolbar
         }
 
         [BackgroundDependencyLoader(true)]
-        private void load()
+        private void load(OsuGame game)
         {
+            this.game = game;
             Padding = new MarginPadding(3);
 
             Children = new List<Drawable>
@@ -42,19 +50,12 @@ namespace osu.Game.Overlays.Toolbar
                     CornerExponent = 3f,
                     Children = new Drawable[]
                     {
-                        new Box
+                        hoverBackground = new Box
                         {
                             RelativeSizeAxes = Axes.Both,
                             Colour = OsuColour.Gray(80).Opacity(180),
                             Blending = BlendingParameters.Additive,
                             Alpha = 0,
-                        },
-                        new Box
-                        {
-                            RelativeSizeAxes = Axes.Both,
-                            Alpha = 0,
-                            Colour = Color4.White.Opacity(100),
-                            Blending = BlendingParameters.Additive,
                         },
                     }
                 },
@@ -76,6 +77,37 @@ namespace osu.Game.Overlays.Toolbar
                     }
                 }
             };
+        }
+
+        protected override bool OnClick(ClickEvent e)
+        {
+            try
+            {
+                var screenStack = game.ChildrenOfType<OsuScreenStack>().FirstOrDefault();
+                if (!(screenStack.CurrentScreen is MainMenu))
+                    return base.OnClick(e);
+
+                screenStack.Push(new GameBoxMainScreen());
+            }
+            catch
+            {
+            }
+
+            return base.OnClick(e);
+        }
+
+        protected override bool OnHover(HoverEvent e)
+        {
+            hoverBackground.FadeIn(200);
+
+            return base.OnHover(e);
+        }
+
+        protected override void OnHoverLost(HoverLostEvent e)
+        {
+            hoverBackground.FadeOut(200);
+
+            base.OnHoverLost(e);
         }
     }
 }

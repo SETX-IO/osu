@@ -1,0 +1,1 @@
+1. 继承 CompositeDrawable 后可以将那个类添加到渲染中
